@@ -41,6 +41,7 @@ class Bird (res : Resources) {
 
         x = ScreenSize.SCREEN_WIDTH/2 - birbList[0].width/2
         y = ScreenSize.SCREEN_WIDTH/2 - birbList[0].width/2
+
     }
 
     fun getBirb(current: Int): Bitmap {

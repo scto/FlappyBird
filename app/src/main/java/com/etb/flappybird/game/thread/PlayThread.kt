@@ -1,9 +1,9 @@
 package com.etb.flappybird.game.thread
 
+import android.app.Activity
+import android.content.Context
 import android.content.res.Resources
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
+import android.graphics.*
 import android.util.Log
 import android.view.SurfaceHolder
 import com.etb.flappybird.R
@@ -11,7 +11,11 @@ import com.etb.flappybird.game.model.BackgroundImage
 import com.etb.flappybird.game.model.Bird
 import com.etb.flappybird.game.model.Cot
 import com.etb.flappybird.game.model.ScreenSize
+import com.etb.flappybird.game.utils.DialogUtils
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.random.Random
+import com.etb.flappybird.game.utils.DialogUtils as DialogUtils1
 
 
 class PlayThread : Thread {
@@ -29,8 +33,10 @@ class PlayThread : Thread {
     private val bird: Bird
 
 
-    private var state: Int = 0
+    private var state: Int = 1
     private var velocityBird: Int = 3
+
+    private lateinit var context: Context
 
     var cot: Cot? = null
     val numCot = 2
@@ -40,6 +46,16 @@ class PlayThread : Thread {
     val kc = ScreenSize.SCREEN_WIDTH * 3 / 4
     var cotArray: ArrayList<Cot> = arrayListOf()
     var ran: Random = Random
+
+    private var score = 0
+    private var paint: Paint = Paint().apply {
+        color = Color.WHITE
+        textSize = 48f
+        textAlign = Paint.Align.CENTER
+    }
+    private lateinit var scoreUpdateTimer: Timer
+    private val scoreUpdateInterval: Long = 1000
+
 
 
     var iCot = 0
@@ -51,9 +67,10 @@ class PlayThread : Thread {
             field = value
         }
 
-    constructor(holder: SurfaceHolder, resources: Resources) {
+    constructor(holder: SurfaceHolder, resources: Resources, context: Context) {
         this.holder = holder
         this.resources = resources
+        this.context = context
         isRunning = true
 
         bird = Bird(resources)
@@ -75,9 +92,11 @@ class PlayThread : Thread {
             if(canvas != null){
                 try{
                     synchronized(holder){
+                        initScoreUpdate()
                         render(canvas)
-                        renderBirdTest(canvas)
-                        renderCotTest(canvas)
+                        renderBird(canvas)
+                        renderCot(canvas)
+                        drawScore(canvas)
                     }
                 }
                 finally{
@@ -111,19 +130,15 @@ class PlayThread : Thread {
 
     }
 
-    private fun renderCotTest(canvas: Canvas?) {
-        if (state == 1) {
+    private fun renderCot(canvas: Canvas?) {
+        if (state == 1) { // if the game is running
             if (cotArray[iCot].x < bird.x - cot!!.w) {
-                iCot++
-                if (iCot > numCot - 1) {
-                    iCot = 0
-                }
-            } else if (
-                bird.x + bird.getBirb(0).width > cotArray[iCot].x &&
-                bird.x < cotArray[iCot].x + cot!!.w &&
-                (bird.y < cotArray[iCot].ccY || bird.y + bird.getBirb(0).height > cotArray[iCot].getBottomY())
+                iCot = (iCot + 1) % numCot
+            } else if (cotArray[iCot].x < bird.x + bird.getBirb(0).width &&
+                (cotArray[iCot].ccY > bird.y + bird.getBirb(0).height || cotArray[iCot].getBottomY() < bird.y)
             ) {
                 isDead = true
+                onDeath()
             }
 
             for (i in 0 until numCot) {
@@ -136,94 +151,32 @@ class PlayThread : Thread {
                     cotArray[i].x -= velocityCot
                 }
 
-                canvas?.drawBitmap(
-                    cot!!.cotTop,
-                    cotArray[i].x.toFloat(),
-                    cotArray[i].getTopY().toFloat(),
-                    null
-                )
+                // rendering top pipes
+                cot?.cotTop?.let {
+                    canvas?.drawBitmap(
+                        it,
+                        cotArray[i].x.toFloat(),
+                        cotArray[i].getTopY().toFloat(),
+                        null
+                    )
+                }
 
-                canvas?.drawBitmap(
-                    cot!!.cotBottom,
-                    cotArray[i].x.toFloat(),
-                    cotArray[i].getBottomY().toFloat(),
-                    null
-                )
+                // rendering bottom pipes (cotTop.x = cotBottom.x)
+                cot?.cotBottom?.let {
+                    canvas?.drawBitmap(
+                        it,
+                        cotArray[i].x.toFloat(),
+                        cotArray[i].getBottomY().toFloat(),
+                        null
+                    )
+                }
             }
         }
     }
 
-    private fun birdDied(){
-
-    }
-
-    private fun renderCot(canvas: Canvas?){
-        if(state == 1) {
-            if (cotArray.get(iCot).x < bird.x - cot!!.w) {
-                iCot++
-                if (iCot > numCot - 1) {
-                    iCot = 0
-                }
-            } else if (((cotArray.get(iCot).x) < bird.getBirb(0).width) &&
-                (cotArray.get(iCot).ccY > bird.y || cotArray.get(iCot).getBottomY() < bird.y + bird.getBirb(0).height)
-            )
-                isDead = true
 
 
-            for (i in 0 until numCot) {// 0, 1, 2
-                if (cotArray.get(i).x < - cot!!.w){
-
-                    cotArray.get(i).x = cotArray.get(i).x + numCot * kc
-                    cotArray.get(i).ccY = ran.nextInt(maxY - minY) + minY
-
-                }
-
-                if(!isDead) {
-                    cotArray.get(i).x = cotArray.get(i).x - velocityCot
-                }
-
-
-                canvas!!.drawBitmap(
-                    cot!!.cotTop,
-                    cotArray.get(i).x.toFloat(),
-                    cotArray.get(i).getTopY().toFloat(),
-                    null
-                )
-
-                          canvas!!.drawBitmap(
-                    cot!!.cotBottom,
-                    cotArray.get(i).x.toFloat(),
-                    cotArray.get(i).getBottomY().toFloat(),
-                    null
-                )
-
-            }
-        }
-    }
-
-    private fun  renderBird(canvas: Canvas?){
-        if(state == 1){
-            if(!isDead) {
-                if (bird.y < (ScreenSize.SCREEN_HEIGHT - bird.getBirb(0).height)) {
-                    velocityBird = velocityBird + 2 // fall down
-                    bird.y = bird.y + velocityBird // fly up
-                }
-            }
-        }
-        if(canvas != null && !isDead){
-            var current : Int = bird.currentFrame
-            if (current <= bird.maxFrame) {
-                canvas!!.drawBitmap(bird.getBirb(current), bird.x.toFloat(), bird.y.toFloat(), null)
-            }
-            current++
-
-            if(current >= bird.maxFrame)
-                current = 0
-            bird.currentFrame = current
-        }
-    }
-
-    private fun renderBirdTest(canvas: Canvas?) {
+    private fun renderBird(canvas: Canvas?) {
         if (state == 1 && !isDead) {
             if (bird.y < (ScreenSize.SCREEN_HEIGHT - bird.getBirb(0).height)) {
                 velocityBird += 2 // fall down
@@ -266,4 +219,44 @@ class PlayThread : Thread {
              velocityBird = -30
          }
     }
+
+    fun onDeath(){
+        isRunning = false
+        cancelScoreUpdate()
+        (context as Activity).runOnUiThread {
+            val dialogUtils = DialogUtils.getInstance()
+            dialogUtils.createDialogDeath(context)
+        }
+
+
+    }
+
+    private fun drawScore(canvas: Canvas?) {
+        canvas?.drawText("Score: $score", canvas.width / 2f, 80f, paint)
+    }
+
+
+    private fun initScoreUpdate() {
+        scoreUpdateTimer = Timer()
+        scoreUpdateTimer.scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+                increaseScore(1) // Aumenta a pontuação em 1 ponto a cada intervalo
+            }
+        }, scoreUpdateInterval, scoreUpdateInterval)
+    }
+
+    private fun increaseScore(points: Int) {
+        score += points
+         }
+
+
+    private fun cancelScoreUpdate() {
+        scoreUpdateTimer.cancel()
+        scoreUpdateTimer.purge()
+    }
+
+
+
+
+
 }
