@@ -19,8 +19,8 @@ jobs:
       run: chmod +x ./gradlew
     - name: Build Release APK
       run: ./gradlew assembleRelease
-    - name: Releasing using Hub
-      uses: r0user/release-apk@main
+    - name: Releasing using r0user/release-apk
+      uses: r0user/release-apk@v1
       env:
         GITHUB_TOKEN: ${{ secrets.TokenForFlappyBird }}
         APP_FOLDER: app
