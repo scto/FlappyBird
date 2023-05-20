@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">FlappyBird</string>
+    <string name="menu_start">Jogar</string>
+    <string name="menu_score">Pontuação</string>
+    <string name="menu_settings">Configuração</string>
+    <string name="menu_about">Sobre</string>
 </resources>
