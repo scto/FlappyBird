@@ -1,12 +1,17 @@
 # Flappy Bird
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
+[![GitHub release](https://img.shields.io/github/v/release/Ruan625Br/FlappyBird)](https://github.com/Ruan625Br/FlappyBird/releases)
 
 O Flappy Bird é um jogo clássico de plataforma no estilo "corra e evite obstáculos". O objetivo é controlar um pássaro, voando entre tubos verdes sem colidir com eles. O jogo termina quando o pássaro colide com um tubo ou com o chão.
 
 Este projeto é uma implementação simples do jogo Flappy Bird usando a linguagem de programação Kotlin e a biblioteca de desenvolvimento de jogos do Android.
 
+[Obtenha o APK](https://github.com/zhanghai/MaterialFiles/releases/latest/download/app-release.apk)
+
+
 ## Capturas de tela
+
 
 ![Captura de tela 1](screenshots/screenshot1.png)
 ![Captura de tela 2](screenshots/screenshot2.png)
