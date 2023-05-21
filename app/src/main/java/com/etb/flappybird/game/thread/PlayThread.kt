@@ -7,6 +7,7 @@ import android.graphics.*
 import android.os.SystemClock
 import android.util.Log
 import android.view.SurfaceHolder
+import androidx.core.content.res.ResourcesCompat
 import com.etb.flappybird.R
 import com.etb.flappybird.game.model.BackgroundImage
 import com.etb.flappybird.game.model.Bird
@@ -48,8 +49,8 @@ class PlayThread : Thread {
 
     private var score = 0
     private var paint: Paint = Paint().apply {
-        color = Color.WHITE
-        textSize = 48f
+        color = Color.BLACK
+        textSize = 65f
         textAlign = Paint.Align.CENTER
     }
     private lateinit var scoreUpdateTimer: Timer
@@ -147,7 +148,7 @@ class PlayThread : Thread {
                         render(canvas)
                         renderBird(canvas)
                         renderCot(canvas)
-                        drawScore(canvas)
+                        renderScore(canvas)
                        renderPause(canvas)
                     }
                 } finally {
@@ -289,8 +290,11 @@ class PlayThread : Thread {
 
     }
 
-    private fun drawScore(canvas: Canvas?) {
-        canvas?.drawText("Score: $score", canvas.width / 2f, 80f, paint)
+    private fun renderScore(canvas: Canvas?) {
+        val typeface = ResourcesCompat.getFont(context, R.font.pixel_font)
+        paint.typeface = typeface
+
+        canvas?.drawText("Score: $score", canvas.width / 2f, 200f, paint)
     }
 
 
