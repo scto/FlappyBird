@@ -8,18 +8,20 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import com.etb.flappybird.game.thread.PlayThread
 
-class PlayView(context: Context?) : SurfaceView(context), SurfaceHolder.Callback {
+class PlayView(context: Context?, type: Int) : SurfaceView(context), SurfaceHolder.Callback {
 
     private val TAG = "PlayView"
     private var playThread: PlayThread? = null
+    var mType = 1
 
     var mContext = context
 
     init {
         val holder = holder
         holder.addCallback(this)
+        mType = type
         isFocusable = true
-        playThread = mContext?.let { PlayThread(holder, resources, it) }
+        playThread = mContext?.let { PlayThread(holder, resources, it, mType) }
 
     }
 
@@ -47,33 +49,10 @@ class PlayView(context: Context?) : SurfaceView(context), SurfaceHolder.Callback
     }
 
 
-    /*event?.let {
-        when (it.action) {
-            MotionEvent.ACTION_DOWN -> {
-                val x = it.x.toInt()
-                val y = it.y.toInt()
-
-                Log.i("X AND Y", "X: $x \nY: $y")
-
-                playThread?.jump()
-
-                if (x == 980 && y == 0) {
-                    // Ação de clique na imagem de pausa
-                    playThread?.onClickPause()
-                }
-            }
-        }
-    }
-
-    return true*/
-
-
-
-
 
     override fun surfaceCreated(holder: SurfaceHolder) {
         if (playThread == null) { // Verifique se playThread é nulo
-            playThread = mContext?.let { PlayThread(holder, resources, it) }
+            playThread = mContext?.let { PlayThread(holder, resources, it, mType) }
         } else {
             playThread!!.start()
         }
@@ -103,7 +82,7 @@ class PlayView(context: Context?) : SurfaceView(context), SurfaceHolder.Callback
     fun restartGame() {
         playThread?.run { resetGame() }
         playThread?.interrupt()
-        playThread = mContext?.let { PlayThread(holder, resources, it) }
+        playThread = mContext?.let { PlayThread(holder, resources, it, mType) }
         playThread?.start()
     }
 

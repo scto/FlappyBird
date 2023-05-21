@@ -51,6 +51,7 @@
                             android:id="@+id/m_start"
                             android:text="@string/menu_start"/>
 
+
                     <Button
                             android:layout_height="wrap_content"
                             android:layout_width="300dp"

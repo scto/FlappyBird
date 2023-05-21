@@ -16,7 +16,8 @@ class PlayActivity : AppCompatActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val playView = PlayView(this)
+        val type = intent.getIntExtra("type", 0)
+        val playView = PlayView(this, type)
         val gameController = GameController.getInstance()
         gameController.setPlayView(playView)
         setContentView(playView)
@@ -25,3 +26,4 @@ class PlayActivity : AppCompatActivity(){
     }
 
 }
+

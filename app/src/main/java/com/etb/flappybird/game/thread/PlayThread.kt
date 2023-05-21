@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.SurfaceHolder
 import androidx.core.content.res.ResourcesCompat
 import com.etb.flappybird.R
+import com.etb.flappybird.game.controller.GameConfig
 import com.etb.flappybird.game.model.BackgroundImage
 import com.etb.flappybird.game.model.Bird
 import com.etb.flappybird.game.model.Cot
@@ -29,8 +30,8 @@ class PlayThread : Thread {
     private var bitmapImage: Bitmap? = null
     private var startTime: Long = 0
     private var frameTime: Long = 0
-    private val velocity = 3
-    private val bird: Bird
+    private var velocity = 3
+    private var bird: Bird
 
 
     private var state: Int = 1
@@ -40,7 +41,7 @@ class PlayThread : Thread {
 
     var cot: Cot? = null
     val numCot = 2
-    val velocityCot = 10
+    var velocityCot = 10
     val minY = 250
     val maxY = ScreenSize.SCREEN_HEIGHT - minY - 500
     val kc = ScreenSize.SCREEN_WIDTH * 3 / 4
@@ -88,11 +89,13 @@ class PlayThread : Thread {
             field = value
         }
 
-    constructor(holder: SurfaceHolder, resources: Resources, context: Context) {
+    constructor(holder: SurfaceHolder, resources: Resources, context: Context, type: Int) {
         this.holder = holder
         this.resources = resources
         this.context = context
+        initConfig(type)
         isRunning = true
+
 
         bird = Bird(resources)
 
@@ -414,6 +417,41 @@ class PlayThread : Thread {
 
             canvas.drawBitmap(it, this.pauseImageX.toFloat(), this.pauseImageY.toFloat(), null)
         }
+
+    }
+
+    private fun initConfig(type: Int) {
+
+        when (type) {
+            0 -> setDiffEasy()
+            1 -> setDiffNormal()
+            2 -> setDiffCut()
+        }
+
+
+    }
+
+    private fun setDiffEasy() {
+        val diffEasy = GameConfig.DiffEasy.getInstance()
+        velocity = diffEasy.velocity
+        velocityBird = diffEasy.velocityBird
+        velocityCot = diffEasy.velocityCot
+
+    }
+
+    private fun setDiffNormal() {
+        val diffNormal = GameConfig.DiffNormal.getInstance()
+        velocity = diffNormal.velocity
+        velocityBird = diffNormal.velocityBird
+        velocityCot = diffNormal.velocityCot
+
+    }
+
+    private fun setDiffCut() {
+        val diffCut = GameConfig.DiffCut.getInstance()
+        velocity = diffCut.velocity
+        velocityBird = diffCut.velocityBird
+        velocityCot = diffCut.velocityCot
 
     }
 

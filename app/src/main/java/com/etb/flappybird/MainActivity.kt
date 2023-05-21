@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import com.etb.flappybird.game.activity.SelectActivity
+import com.etb.flappybird.game.interfaces.OnItemSelectedListener
 import com.etb.flappybird.game.model.ScreenSize
 import com.etb.flappybird.game.ui.PlayActivity
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(){
 
     private val Tag = "MainActivity"
 
@@ -20,11 +22,12 @@ class MainActivity : AppCompatActivity() {
        val btnPlay : Button = findViewById(R.id.m_start)
 
         btnPlay.setOnClickListener{
-            val iPlayGame = Intent(this@MainActivity, PlayActivity::class.java)
+            val iPlayGame = Intent(this@MainActivity, SelectActivity::class.java)
             startActivity(iPlayGame)
             finish()
             Log.d(Tag, "Button Play Activated")
         }
 
     }
+
 }
