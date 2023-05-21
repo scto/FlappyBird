@@ -57,6 +57,8 @@ class PlayThread : Thread {
     private val scoreUpdateInterval: Long = 1000
     private var isScoreUpdatePaused: Boolean = false
 
+    var gap = 200 // Defina o espaçamento desejado entre os cots
+
 
     var isPaused: Boolean = false
     private var pauseStartTime: Long = 0
@@ -102,7 +104,7 @@ class PlayThread : Thread {
 
 
         pauseImage = Bitmap.createScaledBitmap(pauseImage!!, pauseImageSize, pauseImageSize, false)
-       // resumeImage = Bitmap.createScaledBitmap(resumeImage!!, pauseImageSize, pauseImageSize, false)
+        // resumeImage = Bitmap.createScaledBitmap(resumeImage!!, pauseImageSize, pauseImageSize, false)
 
         val pauseImageLeft = (ScreenSize.SCREEN_WIDTH - pauseImageSize) / 2
         val pauseImageTop = (ScreenSize.SCREEN_HEIGHT - pauseImageSize) / 2
@@ -110,7 +112,7 @@ class PlayThread : Thread {
         val pauseImageBottom = pauseImageTop + pauseImageSize
         pauseImageRect = Rect(pauseImageLeft, pauseImageTop, pauseImageRight, pauseImageBottom)
 
-      /*  val resumeImageLeft = (ScreenSize.SCREEN_WIDTH - pauseImageSize) / 2
+        /*  val resumeImageLeft = (ScreenSize.SCREEN_WIDTH - pauseImageSize) / 2
         val resumeImageTop = (ScreenSize.SCREEN_HEIGHT - pauseImageSize) / 2
         val resumeImageRight = resumeImageLeft + pauseImageSize
         val resumeImageBottom = resumeImageTop + pauseImageSize
@@ -149,7 +151,7 @@ class PlayThread : Thread {
                         renderBird(canvas)
                         renderCot(canvas)
                         renderScore(canvas)
-                       renderPause(canvas)
+                        renderPause(canvas)
                     }
                 } finally {
                     holder.unlockCanvasAndPost(canvas)
@@ -167,6 +169,7 @@ class PlayThread : Thread {
         Log.d(TAG, "Thread has reached its finale.")
     }
 
+
     private fun createCot(resources: Resources) {
         for (i in 0 until numCot) {
             val cot = Cot(resources)
@@ -183,22 +186,70 @@ class PlayThread : Thread {
 
     }
 
+
+    private fun renderCotTest(canvas: Canvas?) {
+        if (state == 1) {
+            val gap = 200 // Defina o espaçamento desejado entre os cots
+
+            for (i in 0 until numCot) {
+                val currentCot = cotArray[i]
+
+                if (currentCot.x + cot!!.w < bird.x) {
+                    currentCot.x += (numCot * kc).toInt()
+                    currentCot.ccY = ran.nextInt(maxY - minY) + minY
+                }
+
+                if (!isDead) {
+                    currentCot.x -= velocityCot
+                }
+
+                val topY = currentCot.ccY - cot!!.cotTop.height
+                val bottomY = currentCot.getBottomY() + gap
+
+                // rendering top pipes
+                cot?.cotTop?.let { topPipe ->
+                    canvas?.drawBitmap(topPipe, currentCot.x.toFloat(), topY.toFloat(), null)
+                }
+
+                // rendering bottom pipes (cotTop.x = cotBottom.x)
+                cot?.cotBottom?.let { bottomPipe ->
+                    canvas?.drawBitmap(bottomPipe, currentCot.x.toFloat(), bottomY.toFloat(), null)
+                }
+
+                if (bird.x + bird.getBirb(0).width > currentCot.x && bird.x < currentCot.x + cot!!.w) {
+                    if (bird.y < topY || bird.y + bird.getBirb(0).height > bottomY) {
+                        isDead = true
+                        onDeath()
+                    }
+                } else if (bird.y + bird.getBirb(0).height > topY && bird.x + bird.getBirb(0).width > currentCot.x && bird.x < currentCot.x + cot!!.w) {
+                    isDead = true
+                    onDeath()
+                }
+            }
+        }
+    }
+
+
     private fun renderCot(canvas: Canvas?) {
-        if (state == 1) { // if the game is running
+        if (state == 1) {
             if (cotArray[iCot].x < bird.x - cot!!.w) {
                 iCot = (iCot + 1) % numCot
-            } else if (cotArray[iCot].x < bird.x + bird.getBirb(0).width &&
-                (cotArray[iCot].ccY > bird.y + bird.getBirb(0).height || cotArray[iCot].getBottomY() < bird.y)
+            } else if (cotArray[iCot].x < bird.x + bird.getBirb(0).width && (cotArray[iCot].ccY > bird.y + bird.getBirb(
+                    0
+                ).height || cotArray[iCot].getBottomY() < bird.y)
             ) {
                 isDead = true
                 onDeath()
             }
+
 
             for (i in 0 until numCot) {
                 if (cotArray[i].x < -cot!!.w) {
                     cotArray[i].x += numCot * kc
                     cotArray[i].ccY = ran.nextInt(maxY - minY) + minY
                 }
+
+
 
                 if (!isDead) {
                     cotArray[i].x -= velocityCot
@@ -207,20 +258,16 @@ class PlayThread : Thread {
                 // rendering top pipes
                 cot?.cotTop?.let {
                     canvas?.drawBitmap(
-                        it,
-                        cotArray[i].x.toFloat(),
-                        cotArray[i].getTopY().toFloat(),
-                        null
+                        it, cotArray[i].x.toFloat(), cotArray[i].getTopY().toFloat(), null
                     )
                 }
+
+                var bottomY = cotArray[i].getBottomY() + gap
 
                 // rendering bottom pipes (cotTop.x = cotBottom.x)
                 cot?.cotBottom?.let {
                     canvas?.drawBitmap(
-                        it,
-                        cotArray[i].x.toFloat(),
-                        cotArray[i].getBottomY().toFloat(),
-                        null
+                        it, cotArray[i].x.toFloat(), bottomY.toFloat(), null
                     )
                 }
             }
@@ -243,8 +290,7 @@ class PlayThread : Thread {
             }
             current++
 
-            if (current >= bird.maxFrame)
-                current = 0
+            if (current >= bird.maxFrame) current = 0
             bird.currentFrame = current
         }
     }
@@ -262,13 +308,12 @@ class PlayThread : Thread {
         if (backgroundImage.x < -(bitmapImage!!.width - ScreenSize.SCREEN_WIDTH)) {
             bitmapImage?.let {
                 canvas!!.drawBitmap(
-                    it,
-                    (backgroundImage.x + bitmapImage!!.width).toFloat(),
-                    (backgroundImage.y).toFloat(),
-                    null
+                    it, (backgroundImage.x + bitmapImage!!.width).toFloat(), (backgroundImage.y).toFloat(), null
                 )
+
             }
         }
+
     }
 
     fun jump() {
@@ -298,26 +343,25 @@ class PlayThread : Thread {
     }
 
 
-    private fun initScoreUpdate() {
+    fun initScoreUpdate() {
         scoreUpdateTimer = Timer()
         scoreUpdateTimer.scheduleAtFixedRate(object : TimerTask() {
             override fun run() {
                 if (!isScoreUpdatePaused) {
-                    increaseScore(1) // Aumenta a pontuação em 1 ponto a cada intervalo
+                    1.increaseScore() // Aumenta a pontuação em 1 ponto a cada intervalo
                 }
             }
         }, scoreUpdateInterval, scoreUpdateInterval)
     }
 
-    private fun increaseScore(points: Int) {
-        if (!isScoreUpdatePaused){
-            score += points
+    private fun Int.increaseScore() {
+        if (!isScoreUpdatePaused) {
+            score += this
         }
-
     }
 
 
-    private fun cancelScoreUpdate() {
+    fun cancelScoreUpdate() {
         scoreUpdateTimer.cancel()
         scoreUpdateTimer.purge()
     }
@@ -351,10 +395,10 @@ class PlayThread : Thread {
         pauseTime = 0
     }
 
-    fun onClickPause(){
-        if (isPaused){
+    fun onClickPause() {
+        if (isPaused) {
             resumeGame()
-        }else{
+        } else {
             pauseGame()
         }
 
@@ -365,14 +409,14 @@ class PlayThread : Thread {
 
 
         pauseImage?.let {
-            pauseImageX= (ScreenSize.SCREEN_WIDTH - it.width)
+            pauseImageX = (ScreenSize.SCREEN_WIDTH - it.width)
             pauseImageY = 0
 
-            canvas?.drawBitmap(it, this.pauseImageX.toFloat(), this.pauseImageY.toFloat(), null)
+            canvas.drawBitmap(it, this.pauseImageX.toFloat(), this.pauseImageY.toFloat(), null)
         }
 
     }
 
 
-
 }
+
