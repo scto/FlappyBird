@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.*
+import android.os.SystemClock
 import android.util.Log
 import android.view.SurfaceHolder
 import com.etb.flappybird.R
@@ -13,9 +14,7 @@ import com.etb.flappybird.game.model.Cot
 import com.etb.flappybird.game.model.ScreenSize
 import com.etb.flappybird.game.utils.DialogUtils
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.random.Random
-import com.etb.flappybird.game.utils.DialogUtils as DialogUtils1
 
 
 class PlayThread : Thread {
@@ -55,7 +54,26 @@ class PlayThread : Thread {
     }
     private lateinit var scoreUpdateTimer: Timer
     private val scoreUpdateInterval: Long = 1000
+    private var isScoreUpdatePaused: Boolean = false
 
+
+    var isPaused: Boolean = false
+    private var pauseStartTime: Long = 0
+    private var pauseTime: Long = 0
+    var pauseImage: Bitmap? = null
+    var pauseImageRect: Rect? = null
+    var resumeImage: Bitmap? = null
+    var resumeImageRect: Rect? = null
+    var pauseImageX: Int = 0
+        get() = field
+        set(value) {
+            field = value
+        }
+    var pauseImageY: Int = 0
+        get() = field
+        set(value) {
+            field = value
+        }
 
 
     var iCot = 0
@@ -78,6 +96,29 @@ class PlayThread : Thread {
         bitmapImage = BitmapFactory.decodeResource(resources, R.drawable.run_background)
         bitmapImage = this.bitmapImage?.let { scaleResize(it) }
 
+        pauseImage = BitmapFactory.decodeResource(resources, R.drawable.ic_pause)
+        val pauseImageSize = 100 // Tamanho desejado em pixels
+
+
+        pauseImage = Bitmap.createScaledBitmap(pauseImage!!, pauseImageSize, pauseImageSize, false)
+       // resumeImage = Bitmap.createScaledBitmap(resumeImage!!, pauseImageSize, pauseImageSize, false)
+
+        val pauseImageLeft = (ScreenSize.SCREEN_WIDTH - pauseImageSize) / 2
+        val pauseImageTop = (ScreenSize.SCREEN_HEIGHT - pauseImageSize) / 2
+        val pauseImageRight = pauseImageLeft + pauseImageSize
+        val pauseImageBottom = pauseImageTop + pauseImageSize
+        pauseImageRect = Rect(pauseImageLeft, pauseImageTop, pauseImageRight, pauseImageBottom)
+
+      /*  val resumeImageLeft = (ScreenSize.SCREEN_WIDTH - pauseImageSize) / 2
+        val resumeImageTop = (ScreenSize.SCREEN_HEIGHT - pauseImageSize) / 2
+        val resumeImageRight = resumeImageLeft + pauseImageSize
+        val resumeImageBottom = resumeImageTop + pauseImageSize
+        pauseImageRect = Rect(resumeImageLeft, resumeImageTop, resumeImageRight, resumeImageBottom)
+*/
+
+
+
+
         cot = Cot(resources)
         createCot(resources)
     }
@@ -85,35 +126,46 @@ class PlayThread : Thread {
     override fun run() {
         Log.d(TAG, "Thread Started")
 
-        while (isRunning){
+        while (isRunning) {
+            if (isPaused) {
+                pauseStartTime = SystemClock.elapsedRealtime()
+                // Espera até que o estado de pausa seja alterado
+                while (isPaused) {
+                    // Se necessário, você pode adicionar algum código aqui
+                }
+                val elapsedPauseTime = SystemClock.elapsedRealtime() - pauseStartTime
+                // Atualiza o tempo de pausa total
+                pauseTime += elapsedPauseTime
+            }
             if (holder == null) return
             startTime = System.nanoTime()
             val canvas = holder.lockCanvas()
-            if(canvas != null){
-                try{
-                    synchronized(holder){
+            if (canvas != null) {
+                try {
+                    synchronized(holder) {
                         initScoreUpdate()
                         render(canvas)
                         renderBird(canvas)
                         renderCot(canvas)
                         drawScore(canvas)
+                       renderPause(canvas)
                     }
-                }
-                finally{
+                } finally {
                     holder.unlockCanvasAndPost(canvas)
                 }
             }
             frameTime = (System.nanoTime() - startTime) / 1000000
             if (frameTime < FPS) {
-                try{
-                    Thread.sleep( FPS - frameTime)
-                }catch (e : InterruptedException){
+                try {
+                    Thread.sleep(FPS - frameTime)
+                } catch (e: InterruptedException) {
                     Log.e("Interrupted Stuff", "Thread is asleep. Error.")
                 }
             }
         }
         Log.d(TAG, "Thread has reached its finale.")
     }
+
     private fun createCot(resources: Resources) {
         for (i in 0 until numCot) {
             val cot = Cot(resources)
@@ -175,7 +227,6 @@ class PlayThread : Thread {
     }
 
 
-
     private fun renderBird(canvas: Canvas?) {
         if (state == 1 && !isDead) {
             if (bird.y < (ScreenSize.SCREEN_HEIGHT - bird.getBirb(0).height)) {
@@ -198,29 +249,36 @@ class PlayThread : Thread {
     }
 
 
-    private fun render(canvas: Canvas?){
-        if (!isDead){
+    private fun render(canvas: Canvas?) {
+        if (!isDead) {
             backgroundImage.x = backgroundImage.x - velocity
         }
-        if (backgroundImage.x < - bitmapImage!!.width){
+        if (backgroundImage.x < -bitmapImage!!.width) {
             backgroundImage.x = 0
         }
         bitmapImage?.let { canvas!!.drawBitmap(it, (backgroundImage.x).toFloat(), (backgroundImage.y).toFloat(), null) }
 
-        if (backgroundImage.x < - (bitmapImage!!.width - ScreenSize.SCREEN_WIDTH)){
-            bitmapImage?.let { canvas!!.drawBitmap(it, (backgroundImage.x + bitmapImage!!.width).toFloat(), (backgroundImage.y).toFloat(), null) }
+        if (backgroundImage.x < -(bitmapImage!!.width - ScreenSize.SCREEN_WIDTH)) {
+            bitmapImage?.let {
+                canvas!!.drawBitmap(
+                    it,
+                    (backgroundImage.x + bitmapImage!!.width).toFloat(),
+                    (backgroundImage.y).toFloat(),
+                    null
+                )
+            }
         }
     }
 
-    fun  jump(){
+    fun jump() {
         Log.i("JUMP", "Initialize Jump")
         state = 1
-         if (bird.y > 0 ){
-             velocityBird = -30
-         }
+        if (bird.y > 0) {
+            velocityBird = -30
+        }
     }
 
-    fun onDeath(){
+    fun onDeath() {
         isRunning = false
         cancelScoreUpdate()
         (context as Activity).runOnUiThread {
@@ -240,14 +298,19 @@ class PlayThread : Thread {
         scoreUpdateTimer = Timer()
         scoreUpdateTimer.scheduleAtFixedRate(object : TimerTask() {
             override fun run() {
-                increaseScore(1) // Aumenta a pontuação em 1 ponto a cada intervalo
+                if (!isScoreUpdatePaused) {
+                    increaseScore(1) // Aumenta a pontuação em 1 ponto a cada intervalo
+                }
             }
         }, scoreUpdateInterval, scoreUpdateInterval)
     }
 
     private fun increaseScore(points: Int) {
-        score += points
-         }
+        if (!isScoreUpdatePaused){
+            score += points
+        }
+
+    }
 
 
     private fun cancelScoreUpdate() {
@@ -255,7 +318,56 @@ class PlayThread : Thread {
         scoreUpdateTimer.purge()
     }
 
+    fun pauseScoreUpdate() {
+        isScoreUpdatePaused = true
+    }
 
+    fun resumeScoreUpdate() {
+        isScoreUpdatePaused = false
+    }
+
+
+    fun pauseGame() {
+        pauseImage = BitmapFactory.decodeResource(resources, R.drawable.ic_pause)
+        pauseScoreUpdate()
+        isPaused = true
+
+    }
+
+    fun resumeGame() {
+        pauseImage = BitmapFactory.decodeResource(resources, R.drawable.ic_play)
+        resumeScoreUpdate()
+        isPaused = false
+    }
+
+    fun resetGame() {
+        isPaused = false
+        isScoreUpdatePaused = false
+        pauseStartTime = 0
+        pauseTime = 0
+    }
+
+    fun onClickPause(){
+        if (isPaused){
+            resumeGame()
+        }else{
+            pauseGame()
+        }
+
+    }
+
+    fun renderPause(canvas: Canvas) {
+        Log.i("MY SIZE", "X: $pauseImageX\nY: $pauseImageY")
+
+
+        pauseImage?.let {
+            pauseImageX= (ScreenSize.SCREEN_WIDTH - it.width)
+            pauseImageY = 0
+
+            canvas?.drawBitmap(it, this.pauseImageX.toFloat(), this.pauseImageY.toFloat(), null)
+        }
+
+    }
 
 
 
