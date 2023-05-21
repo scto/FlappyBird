@@ -7,7 +7,7 @@ O Flappy Bird é um jogo clássico de plataforma no estilo "corra e evite obstá
 
 Este projeto é uma implementação simples do jogo Flappy Bird usando a linguagem de programação Kotlin e a biblioteca de desenvolvimento de jogos do Android.
 
-[Obtenha o APK](https://github.com/zhanghai/MaterialFiles/releases/latest/download/app-release.apk)
+[Obtenha o APK](https://github.com/zhanghai/MaterihalFiles/releases/latest/download/app-release.apk)
 
 
 ## Capturas de tela
