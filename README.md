@@ -34,6 +34,16 @@ Este projeto é uma implementação simples do jogo Flappy Bird usando a linguag
 - Android SDK versão 26 ou superior
 - Dispositivo Android ou emulador
 
+## Instalação
+
+> _Instale o FlappyBird apenas de fontes confiáveis, ou seja._
+> - [_GitHub Releases_](https://github.com/Ruan625Br/FlappyBird/releases)
+> - [_GitHub Actions_]( https://github.com/Ruan625Br/FlappyBird/actions)
+
+- Baixe o APK do FlappyBird em [releases](https://github.com/Ruan625Br/FlappyBird/releases). You
+ também pode baixar APKs de [GitHub actions]( https://github.com/Ruan625Br/FlappyBird/actions).
+
+
 ## Como executar
 
 1. Clone este repositório para a sua máquina local.
