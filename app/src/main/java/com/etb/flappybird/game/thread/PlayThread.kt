@@ -441,7 +441,7 @@ class PlayThread : Thread {
 
     private fun setDiffNormal() {
         val diffNormal = GameConfig.DiffNormal.getInstance()
-        velocity = diffNormal.velocity
+        velocity =  diffNormal.velocity
         velocityBird = diffNormal.velocityBird
         velocityCot = diffNormal.velocityCot
 
