@@ -5,9 +5,11 @@ import com.etb.flappybird.game.interfaces.OnItemSelectedListener
 
 class SelectItemUtils {
 
-    fun addTagOnListener(tag: String, listener: OnItemSelectedListener) {
-        listener.onSelectScenario(tag)
+    fun addItemOnListener(TAG: String, listener: OnItemSelectedListener) {
+        listener.onSelectScenario(TAG)
+
     }
+
 
     companion object {
         private var instance: SelectItemUtils? = null

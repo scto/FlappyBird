@@ -2,6 +2,7 @@ package com.etb.flappybird.game.model.select
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +14,7 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.etb.flappybird.R
 import com.etb.flappybird.game.activity.SelectActivity
+import com.etb.flappybird.game.controller.GameConfig
 import com.etb.flappybird.game.controller.GameController
 import com.etb.flappybird.game.interfaces.ItemSelected
 import com.etb.flappybird.game.interfaces.OnItemSelectedListener
@@ -36,6 +38,12 @@ class SelectAdapter(private val mList: List<SelectModel>, private val context: C
     override fun onBindViewHolder(holder: SelectAdapter.ViewHolder, position: Int) {
         val itemsViewModel = mList[position]
 
+        val backgroundRun: Bitmap = itemsViewModel.backgroundRun
+        val obstacleTop: Bitmap = itemsViewModel.obstacleTop
+        val obstacleBottom: Bitmap = itemsViewModel.obstacleBottom
+        val obstacleType: Int = itemsViewModel.obstacleType
+        val sceneConfig = GameConfig.SceneConfig.getInstance()
+
 
 
         holder.itemImage.setImageResource(itemsViewModel.image)
@@ -43,7 +51,8 @@ class SelectAdapter(private val mList: List<SelectModel>, private val context: C
         holder.itemBase.setOnClickListener{
 
             val obj = ItemSelected()
-            selectItemUtils.addTagOnListener(TAG, listener)
+            sceneConfig.setSceneConfig( backgroundRun, obstacleTop, obstacleBottom, obstacleType)
+            selectItemUtils.addItemOnListener(TAG, listener)
 
 
            /* val intent = Intent(holder.itemView.context, PlayActivity::class.java)

@@ -99,7 +99,8 @@ class PlayThread : Thread {
 
         bird = Bird(resources)
 
-        bitmapImage = BitmapFactory.decodeResource(resources, R.drawable.run_background)
+        //bitmapImage = BitmapFactory.decodeResource(resources, R.drawable.run_background)
+        bitmapImage = getBackgroundScene()
         bitmapImage = this.bitmapImage?.let { scaleResize(it) }
 
         pauseImage = BitmapFactory.decodeResource(resources, R.drawable.ic_pause)
@@ -441,7 +442,7 @@ class PlayThread : Thread {
 
     private fun setDiffNormal() {
         val diffNormal = GameConfig.DiffNormal.getInstance()
-        velocity =  diffNormal.velocity
+        velocity = diffNormal.velocity
         velocityBird = diffNormal.velocityBird
         velocityCot = diffNormal.velocityCot
 
@@ -453,6 +454,12 @@ class PlayThread : Thread {
         velocityBird = diffCut.velocityBird
         velocityCot = diffCut.velocityCot
 
+    }
+
+     fun getBackgroundScene() : Bitmap? {
+        val sceneConfig = GameConfig.SceneConfig.getInstance()
+
+         return sceneConfig.backgroundRun
     }
 
 

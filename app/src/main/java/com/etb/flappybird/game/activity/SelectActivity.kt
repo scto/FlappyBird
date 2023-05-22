@@ -1,6 +1,7 @@
 package com.etb.flappybird.game.activity
 
 import android.content.Intent
+import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -25,6 +26,11 @@ class SelectActivity : AppCompatActivity(), OnItemSelectedListener {
     lateinit var tvTite: TextView
     var type = 1
 
+    var backgroundRun: Int = 0
+    var obstacleTop: Int = 0
+    var obstacleBottom: Int = 0
+    var obstacleType: Int = 2
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select)
@@ -40,6 +46,10 @@ class SelectActivity : AppCompatActivity(), OnItemSelectedListener {
         button.setOnClickListener {
             val intent = Intent(this, PlayActivity::class.java)
             intent.putExtra("type", type)
+            intent.putExtra("backgroundRun", backgroundRun)
+            intent.putExtra("obstacleTop", obstacleTop)
+            intent.putExtra("obstacleBottom", obstacleBottom)
+            intent.putExtra("obstacleType", obstacleType)
             startActivity(intent)
         }
     }
@@ -48,11 +58,8 @@ class SelectActivity : AppCompatActivity(), OnItemSelectedListener {
 
         recyclerview.layoutManager = GridLayoutManager(this, 4)
         val data = ArrayList<SelectModel>()
-        data.add(SelectModel("Cenário classico", R.drawable.sc_base))
-        data.add(SelectModel("Classic night scenery", R.drawable.sc_base2))
-        data.add(SelectModel("Classic night scenery", R.drawable.sc_base2))
-        data.add(SelectModel("City 1", R.drawable.sc_base4))
-        data.add(SelectModel("City 2", R.drawable.sc_base5))
+        data.add(SelectModel("Cenário classico", R.drawable.run_background, BitmapFactory.decodeResource(resources, R.drawable.sc_base6),  BitmapFactory.decodeResource(resources, R.drawable.cot_top),  BitmapFactory.decodeResource(resources, R.drawable.cot_bottom), 2))
+        data.add(SelectModel("Classic night scenery", R.drawable.sc_base6,  BitmapFactory.decodeResource(resources, R.drawable.sc_baclground1),  BitmapFactory.decodeResource(resources, R.drawable.cot_6_top),  BitmapFactory.decodeResource(resources, R.drawable.cot_6_bottom), 2))
         val adapter = SelectAdapter(data, this, this)
 
         recyclerview.adapter = adapter
@@ -91,8 +98,10 @@ class SelectActivity : AppCompatActivity(), OnItemSelectedListener {
     }
 
     override fun onSelectScenario(tag: String) {
+
         val TAG = "ON_SCENARIO"
         if (tag.equals(TAG)) initSelectScenario()
 
     }
 }
+

@@ -3,11 +3,13 @@ package com.etb.flappybird.game.model
 import android.content.res.Resources
 import android.graphics.BitmapFactory
 import com.etb.flappybird.R
+import com.etb.flappybird.game.controller.GameConfig
 
 class Cot(res: Resources) {
-    val cotTop = BitmapFactory.decodeResource(res, R.drawable.cot_top)
+    val sceneConfig = GameConfig.SceneConfig.getInstance()
+    val cotTop =sceneConfig.obstacleTop
         get() = field
-    val cotBottom = BitmapFactory.decodeResource(res, R.drawable.cot_bottom)
+    val cotBottom = sceneConfig.obstacleBottom
         get() = field
 
     val w = cotTop.width

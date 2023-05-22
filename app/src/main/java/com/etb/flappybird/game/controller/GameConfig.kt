@@ -1,5 +1,7 @@
 package com.etb.flappybird.game.controller
 
+import android.graphics.Bitmap
+
 class GameConfig() {
 
 
@@ -49,6 +51,37 @@ class GameConfig() {
             fun getInstance(): DiffCut {
                 if (instance == null) {
                     instance = DiffCut()
+                }
+                return instance!!
+            }
+        }
+
+    }
+
+    class SceneConfig(){
+        lateinit var backgroundRun: Bitmap
+        lateinit var obstacleTop:Bitmap
+        lateinit var obstacleBottom: Bitmap
+
+
+        // 0 = bottom, 1 = top, 2 = bottom and top
+        var obstacleType = 2
+
+
+           fun setSceneConfig(backgroundRun: Bitmap, obstacleTop: Bitmap, obstacleBottom: Bitmap, obstacleType: Int){
+               this.backgroundRun = backgroundRun
+               this.obstacleTop = obstacleTop
+               this.obstacleBottom = obstacleBottom
+               this.obstacleType = obstacleType
+            }
+
+
+        companion object {
+            private var instance: SceneConfig? = null
+
+            fun getInstance(): SceneConfig {
+                if (instance == null) {
+                    instance = SceneConfig()
                 }
                 return instance!!
             }
